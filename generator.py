@@ -85,7 +85,7 @@ class EnergyGenerator:
         )
 
         # --- SQLite Database Integration ---
-        self.db_path = "telemetry.db"
+        self.db_path = os.path.join(os.path.dirname(__file__), "telemetry.db")
         self._init_db()
 
     def _init_db(self):

@@ -14,7 +14,7 @@ load_dotenv()
 app = Flask(__name__)
 CORS(app)  # Enable cross-origin requests for Vite
 
-DB_FILE = "telemetry.db"
+DB_FILE = os.path.join(os.path.dirname(__file__), "telemetry.db")
 
 
 @app.route("/")
