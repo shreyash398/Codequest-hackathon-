@@ -1,0 +1,108 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #030e22;
+  --primary: #ffa84f;
+  --secondary: #3fff8b;
+  --tertiary: #44a5ff;
+  --error: #ff716c;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--background);
+  color: #dce5ff;
+}
+
+.headline {
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.glass-panel {
+  backdrop-filter: blur(24px);
+  background: rgba(21, 37, 67, 0.4);
+}
+
+.glass-card {
+  backdrop-filter: blur(20px);
+  background: rgba(10, 25, 50, 0.6);
+}
+
+.glow-primary {
+  box-shadow: 0 0 20px rgba(255, 168, 79, 0.2);
+}
+
+.glow-secondary {
+  box-shadow: 0 0 20px rgba(63, 255, 139, 0.2);
+}
+
+.glow-tertiary {
+  box-shadow: 0 0 20px rgba(68, 165, 255, 0.2);
+}
+
+.glow-error {
+  box-shadow: 0 0 20px rgba(255, 113, 108, 0.2);
+}
+
+/* Signature gradient for CTAs */
+.gradient-primary {
+  background: linear-gradient(135deg, #ffa84f, #fe9400);
+}
+
+.gradient-secondary {
+  background: linear-gradient(135deg, #3fff8b, #24f07e);
+}
+
+/* No-Line Rule: Ghost borders */
+.ghost-border {
+  border: 1px solid rgba(107, 117, 142, 0.15);
+}
+
+/* HUD scanline effect */
+.hud-scanline {
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(255, 168, 79, 0.02) 2px,
+    rgba(255, 168, 79, 0.02) 4px
+  );
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 168, 79, 0.15);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 168, 79, 0.3);
+}
+
+/* Toggle switch animation */
+.toggle-track {
+  transition: background-color 0.3s ease;
+}
+
+/* Pulse animation for live indicators */
+@keyframes pulse-glow {
+  0%, 100% { opacity: 1; box-shadow: 0 0 5px currentColor; }
+  50% { opacity: 0.5; box-shadow: 0 0 15px currentColor; }
+}
+
+.pulse-live {
+  animation: pulse-glow 2s infinite;
+}
