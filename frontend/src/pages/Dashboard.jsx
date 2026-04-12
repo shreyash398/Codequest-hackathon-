@@ -4,7 +4,7 @@ import { PlotlyEnergyFlow } from '../components/charts/PlotlyEnergyFlow';
 import { D3WeeklyPerformance } from '../components/charts/D3WeeklyPerformance';
 import { D3StorageGauge } from '../components/charts/D3StorageGauge';
 import { D3EnergyMix } from '../components/charts/D3EnergyMix';
-import { D3LiveGauge } from '../components/charts/D3LiveGauge';
+import { EnergyFlow3D } from '../components/charts/EnergyFlow3D';
 
 export const Dashboard = () => {
   const [data, setData] = useState(null);
@@ -77,13 +77,6 @@ export const Dashboard = () => {
 
   const rawEnergy = history.energy || [];
 
-  // Gauge values
-  const gridLoad = data.total_energy;
-  const gridMax = 15;
-  const batteryPercent = storagePercent;
-  const solarOutput = parseFloat(solarGen);
-  const solarMax = 8;
-
   return (
     <main className="md:ml-64 pt-6 px-6 pb-12 relative">
       <div className="max-w-7xl mx-auto space-y-6">
@@ -127,35 +120,22 @@ export const Dashboard = () => {
           </div>
         </div>
 
-        {/* Live Gauges Row */}
-        <div className="bg-surface-container-highest/60 rounded-2xl p-6 ghost-border">
-          <div className="flex items-center gap-2 mb-4">
-            <span className="material-symbols-outlined text-primary text-lg">speed</span>
-            <h3 className="text-sm font-bold font-headline uppercase tracking-widest">Real-Time Gauges</h3>
-            <div className="ml-auto flex items-center gap-2">
-              <span className={`w-1.5 h-1.5 rounded-full ${data.anomaly?.detected ? 'bg-error' : 'bg-secondary'} pulse-live`}></span>
-              <span className="text-[9px] text-muted uppercase tracking-widest font-bold">LIVE</span>
+        {/* Topology Row */}
+        <div className="mb-6">
+          {/* 3D Energy Flow */}
+          <div className="bg-surface-container-highest/60 rounded-2xl p-6 ghost-border h-[380px] flex flex-col relative overflow-hidden">
+            <div className="flex items-center gap-2 absolute top-6 left-6 z-10 pointer-events-none">
+              <span className="material-symbols-outlined text-primary text-xl">3d_rotation</span>
+              <div>
+                <h3 className="text-lg font-bold font-headline">Energy Flow 3D</h3>
+                <p className="text-[10px] text-muted uppercase tracking-widest mt-0.5">Real-time particle stream</p>
+              </div>
+            </div>
+            <div className="absolute inset-0 pt-16">
+              <EnergyFlow3D data={data} />
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <D3LiveGauge 
-              value={gridLoad} min={0} max={gridMax} 
-              label="Grid Load" unit="kW"
-              thresholds={{ warn: gridMax * 0.6, critical: gridMax * 0.85 }}
-            />
-            <D3LiveGauge 
-              value={batteryPercent} min={0} max={100} 
-              label="Battery Level" unit="%"
-              thresholds={{ warn: 70, critical: 90 }}
-            />
-            <D3LiveGauge 
-              value={solarOutput} min={0} max={solarMax} 
-              label="Solar Output" unit="kW"
-              thresholds={{ warn: solarMax * 0.6, critical: solarMax * 0.85 }}
-            />
-          </div>
         </div>
-
 
         {/* Row 1: Main Metric Cards */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
