@@ -72,8 +72,9 @@ export const Dashboard = () => {
 
   // Solar Values
   const solarGen = (data.total_energy / 1.5).toFixed(2);
-  const pv1 = (solarGen / 2).toFixed(2);
-  const pv2 = (solarGen / 2).toFixed(2);
+  // Realistic asymmetrical split representing two separate string circuits
+  const pv1 = (solarGen * 0.6).toFixed(2);
+  const pv2 = (solarGen * 0.4).toFixed(2);
 
   const rawEnergy = history.energy || [];
 

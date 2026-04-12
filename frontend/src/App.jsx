@@ -1,6 +1,5 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
-import { Header } from './components/layout/Header';
 import { Sidebar } from './components/layout/Sidebar';
 import { Dashboard } from './pages/Dashboard';
 import { Analytics } from './pages/Analytics';
@@ -11,7 +10,6 @@ import { AIChatPanel } from './components/AIChatPanel';
 function App() {
   return (
     <div className="bg-background min-h-screen text-on-background selection:bg-primary/30 font-body">
-      <Header />
       <Sidebar />
       
       <Routes>
