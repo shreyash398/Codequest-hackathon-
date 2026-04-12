@@ -7,18 +7,40 @@ import { D3EnergyMix } from '../components/charts/D3EnergyMix';
 
 export const Dashboard = () => {
   const [data, setData] = useState(null);
+  const [isSimulating, setIsSimulating] = useState(false);
+
+  const fetchData = async () => {
+    try {
+      const r = await fetch('http://localhost:5000/api/status');
+      setData(await r.json());
+    } catch (e) { console.error("Backend unreachable", e); }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const r = await fetch('http://localhost:5000/api/status');
-        setData(await r.json());
-      } catch (e) { console.error("Backend unreachable", e); }
-    };
     fetchData();
     const interval = setInterval(fetchData, 2000);
     return () => clearInterval(interval);
   }, []);
+
+  const triggerSpike = async () => {
+    try {
+      setIsSimulating(true);
+      await fetch('http://localhost:5000/api/trigger-spike', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ device: 'HVAC' })
+      });
+      fetchData();
+    } catch (e) { setIsSimulating(false); }
+  };
+
+  const clearSpike = async () => {
+    try {
+      setIsSimulating(false);
+      await fetch('http://localhost:5000/api/clear-spike', { method: 'POST' });
+      fetchData();
+    } catch (e) { }
+  };
 
   if (!data) return (
     <div className="md:ml-64 h-screen flex items-center justify-center">
@@ -65,9 +87,30 @@ export const Dashboard = () => {
             <button className="text-muted hover:text-on-surface pt-1 pb-1 transition-colors">History</button>
           </div>
           <div className="flex gap-4">
+            <div className="flex gap-2">
+              {data.anomaly?.detected ? (
+                <button 
+                  onClick={clearSpike}
+                  className="flex items-center gap-2 bg-error/20 hover:bg-error/30 text-error rounded-full px-4 py-1.5 ghost-border transition-all animate-pulse"
+                >
+                  <span className="material-symbols-outlined text-[14px]">potted_plant</span>
+                  <span className="text-[9px] font-bold uppercase tracking-widest">STABILIZE GRID</span>
+                </button>
+              ) : (
+                <button 
+                  onClick={triggerSpike}
+                  className="flex items-center gap-2 bg-primary/15 hover:bg-primary/25 text-primary rounded-full px-4 py-1.5 ghost-border transition-all"
+                >
+                  <span className="material-symbols-outlined text-[14px]">warning</span>
+                  <span className="text-[9px] font-bold uppercase tracking-widest">TEST ANOMALY</span>
+                </button>
+              )}
+            </div>
             <div className="flex items-center gap-2 bg-surface-container/80 rounded-full px-3 py-1.5 ghost-border">
-              <span className="w-1.5 h-1.5 rounded-full bg-secondary pulse-live"></span>
-              <span className="text-[9px] text-muted uppercase tracking-widest font-bold">MQTT:CONNECTED</span>
+              <span className={`w-1.5 h-1.5 rounded-full ${data.anomaly?.detected ? 'bg-error pulse-live' : 'bg-secondary pulse-live'}`}></span>
+              <span className="text-[9px] text-muted uppercase tracking-widest font-bold">
+                {data.anomaly?.detected ? 'ANOMALY DETECTED' : 'MQTT:CONNECTED'}
+              </span>
             </div>
             <div className="flex items-center gap-2 bg-surface-container/80 rounded-full px-3 py-1.5 ghost-border">
               <span className="material-symbols-outlined text-primary text-[12px]">bolt</span>
