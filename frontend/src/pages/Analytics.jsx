@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import { HistoricalTrendChart } from '../components/charts/HistoricalTrendChart';
 import { D3PerformanceTrends } from '../components/charts/D3PerformanceTrends';
 import { PlotlyEfficiencyGraph } from '../components/charts/PlotlyEfficiencyGraph';
+import { D3ForecastChart } from '../components/charts/D3ForecastChart';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, ArcElement, Filler, Tooltip, Legend);
 
@@ -14,6 +15,9 @@ export const Analytics = () => {
   const [historyData, setHistoryData] = useState([]);
   const [historyRange, setHistoryRange] = useState('24h');
   const [isHistoryLoading, setIsHistoryLoading] = useState(false);
+  const [forecastData, setForecastData] = useState([]);
+  const [forecastHorizon, setForecastHorizon] = useState('24h');
+  const [isForecastLoading, setIsForecastLoading] = useState(false);
 
   useEffect(() => {
     const f = async () => { try { setData(await (await fetch('http://localhost:5000/api/status')).json()); } catch(e) {} };
@@ -36,6 +40,22 @@ export const Analytics = () => {
     };
     fetchHistory();
   }, [historyRange]);
+
+  useEffect(() => {
+    const fetchForecast = async () => {
+      setIsForecastLoading(true);
+      try {
+        const r = await fetch(`http://localhost:5000/api/forecast?horizon=${forecastHorizon}`);
+        if (r.ok) setForecastData(await r.json());
+      } catch (e) {
+        console.error("Failed to fetch forecast:", e);
+      } finally {
+        setIsForecastLoading(false);
+      }
+    };
+    fetchForecast();
+  }, [forecastHorizon]);
+
   if (!data) return null;
 
   const history = data.history || {};
@@ -75,7 +95,68 @@ export const Analytics = () => {
           <ScoreCard label="Carbon Reduced" value={`${data.carbon_footprint} kg`} color="primary" />
         </div>
 
+        {/* Predictive Forecast Section */}
+        <div className="bg-surface-container-highest/60 rounded-2xl p-6 ghost-border">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-[#ffa84f]/15 flex items-center justify-center">
+                <span className="material-symbols-outlined text-[#ffa84f] text-xl">auto_graph</span>
+              </div>
+              <div>
+                <h3 className="text-xl font-bold font-headline">Predictive Forecast</h3>
+                <p className="text-[10px] text-muted tracking-widest uppercase mt-0.5">AI-powered consumption prediction</p>
+              </div>
+            </div>
+            <div className="flex bg-surface-container-low/80 rounded-xl p-1 ghost-border">
+              {[
+                { label: '24H', value: '24h' },
+                { label: '7D', value: '7d' },
+              ].map((range) => (
+                <button
+                  key={range.value}
+                  onClick={() => setForecastHorizon(range.value)}
+                  className={`px-5 py-1.5 rounded-lg text-[10px] font-black tracking-widest uppercase transition-all ${forecastHorizon === range.value ? 'bg-[#ffa84f]/20 text-[#ffa84f] shadow-lg' : 'text-muted hover:text-on-surface'}`}
+                >
+                  {range.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="h-[320px] relative">
+            {isForecastLoading && (
+              <div className="absolute inset-0 bg-surface-container/20 backdrop-blur-[2px] z-10 flex items-center justify-center rounded-xl">
+                <div className="w-8 h-8 border-2 border-[#ffa84f] border-t-transparent rounded-full animate-spin"></div>
+              </div>
+            )}
+            <D3ForecastChart data={forecastData} horizon={forecastHorizon} />
+          </div>
+
+          {/* Forecast Summary Cards */}
+          {forecastData.length > 0 && (
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-6">
+              <div className="bg-surface-container/60 rounded-xl p-4 ghost-border text-center">
+                <span className="text-[9px] text-muted uppercase tracking-widest block mb-1">Peak Predicted</span>
+                <span className="text-xl font-black font-headline text-error">{Math.max(...forecastData.map(f => f.predicted)).toFixed(1)} <span className="text-xs font-normal text-muted">kW</span></span>
+              </div>
+              <div className="bg-surface-container/60 rounded-xl p-4 ghost-border text-center">
+                <span className="text-[9px] text-muted uppercase tracking-widest block mb-1">Lowest Predicted</span>
+                <span className="text-xl font-black font-headline text-secondary">{Math.min(...forecastData.map(f => f.predicted)).toFixed(1)} <span className="text-xs font-normal text-muted">kW</span></span>
+              </div>
+              <div className="bg-surface-container/60 rounded-xl p-4 ghost-border text-center">
+                <span className="text-[9px] text-muted uppercase tracking-widest block mb-1">Average</span>
+                <span className="text-xl font-black font-headline text-[#ffa84f]">{(forecastData.reduce((s, f) => s + f.predicted, 0) / forecastData.length).toFixed(1)} <span className="text-xs font-normal text-muted">kW</span></span>
+              </div>
+              <div className="bg-surface-container/60 rounded-xl p-4 ghost-border text-center">
+                <span className="text-[9px] text-muted uppercase tracking-widest block mb-1">Confidence</span>
+                <span className="text-xl font-black font-headline text-primary">±{forecastHorizon === '24h' ? '8-20' : '10-25'}%</span>
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* Trends & Distribution Row */}
+
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Trend Chart */}
           <div className="lg:col-span-8 bg-surface-container-highest/60 rounded-2xl p-6 ghost-border">

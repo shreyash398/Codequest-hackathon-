@@ -6,6 +6,7 @@ import { Dashboard } from './pages/Dashboard';
 import { Analytics } from './pages/Analytics';
 import { AnalyticsDeep } from './pages/AnalyticsDeep';
 import { ControlCenter } from './pages/ControlCenter';
+import { AIChatPanel } from './components/AIChatPanel';
 
 function App() {
   return (
@@ -19,6 +20,9 @@ function App() {
         <Route path="/analytics/deep" element={<AnalyticsDeep />} />
         <Route path="/control" element={<ControlCenter />} />
       </Routes>
+
+      {/* AI Chat Panel — accessible from every page */}
+      <AIChatPanel />
 
       {/* Background Decoration */}
       <div className="fixed top-0 right-0 -z-10 w-[500px] h-[500px] bg-primary/5 blur-[150px] rounded-full pointer-events-none"></div>

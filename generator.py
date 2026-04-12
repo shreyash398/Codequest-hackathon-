@@ -263,6 +263,70 @@ class EnergyGenerator:
             self.appliances[name]["target_baseline"] = base
             self.appliances[name]["status"] = "ON"
 
+    def generate_forecast(self, horizon='24h'):
+        """
+        Generate energy consumption forecast based on historical patterns.
+        Returns list of {hour, predicted, upper, lower} for charting.
+        """
+        from datetime import datetime, timedelta
+        import math
+
+        # Base prediction from detector's historical average
+        base = self.detector.baseline_prediction
+        if base <= 0:
+            base = self.total_standard_baseline
+
+        now = datetime.now()
+        points = []
+
+        if horizon == '7d':
+            num_points = 7 * 24  # hourly for 7 days
+        else:
+            num_points = 24  # hourly for 24h
+
+        for i in range(num_points):
+            future_time = now + timedelta(hours=i)
+            hour_of_day = future_time.hour
+
+            # Time-of-day weighting (peak hours have higher consumption)
+            # Simulates typical industrial/residential pattern
+            if 9 <= hour_of_day <= 17:  # Peak hours
+                tod_factor = 1.0 + 0.15 * math.sin((hour_of_day - 9) * math.pi / 8)
+            elif 6 <= hour_of_day <= 9:  # Morning ramp-up
+                tod_factor = 0.7 + 0.3 * ((hour_of_day - 6) / 3)
+            elif 17 < hour_of_day <= 22:  # Evening wind-down
+                tod_factor = 1.0 - 0.3 * ((hour_of_day - 17) / 5)
+            else:  # Night (minimal load)
+                tod_factor = 0.55 + random.uniform(-0.05, 0.05)
+
+            # Slight daily variation for multi-day forecasts
+            day_offset = i // 24
+            day_factor = 1.0 + (random.uniform(-0.03, 0.03) * day_offset)
+
+            predicted = base * tod_factor * day_factor
+            # Add small random noise
+            predicted *= random.uniform(0.97, 1.03)
+
+            # Confidence bounds widen over time
+            uncertainty = 0.08 + (i / num_points) * 0.12
+            upper = predicted * (1 + uncertainty)
+            lower = predicted * (1 - uncertainty)
+
+            # Format label
+            if horizon == '7d':
+                label = future_time.strftime('%a %H:%M') if i % 6 == 0 else ''
+            else:
+                label = future_time.strftime('%H:%M')
+
+            points.append({
+                'hour': label,
+                'predicted': round(predicted, 2),
+                'upper': round(upper, 2),
+                'lower': round(lower, 2),
+            })
+
+        return points
+
     def get_history_data(self):
         """Returns the history buffer as a list of dictionaries for export."""
         export = []
