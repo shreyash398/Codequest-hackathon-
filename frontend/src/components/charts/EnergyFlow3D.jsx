@@ -148,9 +148,9 @@ const EnergyScene = ({ data }) => {
       <pointLight position={[-3, -2, 2]} intensity={0.4} color="#3fff8b" />
 
       {/* Nodes */}
-      <EnergyNode position={nodes.solar} color="#ffa84f" label="Solar" scale={1.1} pulse labelOffset={[-0.8, 0.1, 0]} floatOffset={0} />
+      <EnergyNode position={nodes.solar} color="#ffa84f" label="Solar" scale={1.1} pulse labelOffset={[0, 0.45, 0]} floatOffset={0} />
       <EnergyNode position={nodes.battery} color="#3fff8b" label="Battery" scale={0.9} pulse={ecoMode} labelOffset={[0, -0.45, 0]} floatOffset={1} />
-      <EnergyNode position={nodes.grid} color="#44a5ff" label="Grid" scale={1.0} pulse={isAnomaly} labelOffset={[0.8, 0.1, 0]} floatOffset={2} />
+      <EnergyNode position={nodes.grid} color="#44a5ff" label="Grid" scale={1.0} pulse={isAnomaly} labelOffset={[0, 0.45, 0]} floatOffset={2} />
       <EnergyNode position={nodes.home} color="#ff716c" label="Home" scale={0.95} labelOffset={[0, -0.45, 0]} floatOffset={3} />
 
       {/* Connection lines */}

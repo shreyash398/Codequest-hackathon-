@@ -120,23 +120,6 @@ export const Dashboard = () => {
           </div>
         </div>
 
-        {/* Topology Row */}
-        <div className="mb-6">
-          {/* 3D Energy Flow */}
-          <div className="bg-surface-container-highest/60 rounded-2xl p-6 ghost-border h-[380px] flex flex-col relative overflow-hidden">
-            <div className="flex items-center gap-2 absolute top-6 left-6 z-10 pointer-events-none">
-              <span className="material-symbols-outlined text-primary text-xl">3d_rotation</span>
-              <div>
-                <h3 className="text-lg font-bold font-headline">Energy Flow 3D</h3>
-                <p className="text-[10px] text-muted uppercase tracking-widest mt-0.5">Real-time particle stream</p>
-              </div>
-            </div>
-            <div className="absolute inset-0 pt-16">
-              <EnergyFlow3D data={data} />
-            </div>
-          </div>
-        </div>
-
         {/* Row 1: Main Metric Cards */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Solar Gen */}
@@ -255,8 +238,25 @@ export const Dashboard = () => {
           </div>
         </div>
 
+        {/* Topology Row */}
+        <div className="mb-6">
+          {/* 3D Energy Flow */}
+          <div className="bg-surface-container-highest/60 rounded-2xl p-6 ghost-border h-[380px] flex flex-col relative overflow-hidden">
+            <div className="flex items-center gap-2 absolute top-6 left-6 z-10 pointer-events-none">
+              <span className="material-symbols-outlined text-primary text-xl">3d_rotation</span>
+              <div>
+                <h3 className="text-lg font-bold font-headline">Energy Flow 3D</h3>
+                <p className="text-[10px] text-muted uppercase tracking-widest mt-0.5">Real-time particle stream</p>
+              </div>
+            </div>
+            <div className="absolute inset-0 pt-16">
+              <EnergyFlow3D data={data} />
+            </div>
+          </div>
+        </div>
+
         {/* Row 3: Quick Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
           <StatCard icon="wb_sunny" title="Daily Generation" value="32.4" unit="kWh" trend="+12% vs Yesterday" trendColor="text-secondary" iconColor="text-primary" />
           <StatCard icon="bolt" title="Daily Consumption" value="18.1" unit="kWh" trend="-4% Efficiency" trendColor="text-error" iconColor="text-tertiary" />
           <StatCard icon="payments" title="Cost Savings" value="₹14.65" unit="" sub="today" trendColor="text-secondary" iconColor="text-secondary" />
