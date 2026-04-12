@@ -12,8 +12,20 @@ const navItems = [
 export const Sidebar = () => {
   return (
     <aside className="fixed left-0 top-0 h-full z-40 w-64 bg-[#030e22]/80 backdrop-blur-2xl hidden md:flex flex-col pt-24 ghost-border border-l-0 border-t-0 border-b-0">
-
       
+      {/* Branding - Top Left Corner */}
+      <div className="absolute top-0 left-0 w-full h-24 flex items-center px-8 border-b border-white/5">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-primary/20 border border-primary/40 flex items-center justify-center text-primary shadow-[0_0_15px_rgba(63,255,139,0.3)]">
+            <span className="material-symbols-outlined text-[18px]">electric_bolt</span>
+          </div>
+          <h1 className="text-lg font-black font-headline tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#3fff8b] to-[#44a5ff] leading-none uppercase">
+            Kinetic<br/>Ether
+          </h1>
+        </div>
+      </div>
+
+
       <nav className="flex-1 px-3 space-y-0.5">
         {navItems.map((item) => (
           <NavLink
