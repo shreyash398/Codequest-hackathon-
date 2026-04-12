@@ -245,7 +245,89 @@ export const Dashboard = () => {
           <StatCard icon="eco" title="CO2 Saved" value="12.4" unit="kg" trendColor="text-secondary" iconColor="text-secondary" />
         </div>
 
-        {/* Row 4: Weekly + Mix */}
+        {/* Row 4: Anomaly Simulation Panel */}
+        <div className={`rounded-2xl p-6 ghost-border relative overflow-hidden transition-all duration-500 ${data.anomaly?.detected ? 'bg-error/10 ring-1 ring-error/30' : 'bg-surface-container-highest/60'}`}>
+          {/* Animated background glow when anomaly is active */}
+          {data.anomaly?.detected && (
+            <div className="absolute inset-0 bg-gradient-to-r from-error/5 via-error/10 to-error/5 animate-pulse pointer-events-none"></div>
+          )}
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center gap-3">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${data.anomaly?.detected ? 'bg-error/20 text-error' : 'bg-primary/15 text-primary'}`}>
+                  <span className="material-symbols-outlined text-xl">{data.anomaly?.detected ? 'crisis_alert' : 'science'}</span>
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold font-headline">AI Anomaly Simulation</h3>
+                  <p className="text-[10px] text-muted uppercase tracking-widest font-bold">Grid Stress Test & Diagnostics</p>
+                </div>
+              </div>
+              <div className={`flex items-center gap-2 rounded-full px-4 py-2 ${data.anomaly?.detected ? 'bg-error/20 text-error' : 'bg-secondary/15 text-secondary'}`}>
+                <span className={`w-2 h-2 rounded-full ${data.anomaly?.detected ? 'bg-error animate-ping' : 'bg-secondary'}`}></span>
+                <span className={`w-2 h-2 rounded-full absolute ${data.anomaly?.detected ? 'bg-error' : 'bg-secondary'}`}></span>
+                <span className="text-[10px] font-bold uppercase tracking-widest">{data.anomaly?.detected ? 'ANOMALY ACTIVE' : 'SYSTEM NOMINAL'}</span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              {/* Left: Action Buttons */}
+              <div className="lg:col-span-4 flex flex-col gap-3">
+                {data.anomaly?.detected ? (
+                  <button 
+                    onClick={clearSpike}
+                    className="w-full flex items-center justify-center gap-3 bg-error hover:bg-error/80 text-white py-4 rounded-xl font-bold text-sm tracking-wider transition-all hover:shadow-lg hover:shadow-error/25 active:scale-[0.98]"
+                  >
+                    <span className="material-symbols-outlined text-lg">potted_plant</span>
+                    STABILIZE GRID
+                  </button>
+                ) : (
+                  <button 
+                    onClick={triggerSpike}
+                    className="w-full flex items-center justify-center gap-3 gradient-primary text-[#231000] py-4 rounded-xl font-bold text-sm tracking-wider transition-all hover:brightness-110 hover:shadow-lg hover:shadow-primary/25 active:scale-[0.98]"
+                  >
+                    <span className="material-symbols-outlined text-lg">warning</span>
+                    SIMULATE GRID SPIKE
+                  </button>
+                )}
+                <p className="text-[10px] text-muted text-center leading-relaxed">
+                  {data.anomaly?.detected 
+                    ? 'An anomaly has been injected. The AI is analyzing the spike. Click above to resolve.' 
+                    : 'Inject a simulated power surge to test AI detection and response capabilities.'}
+                </p>
+              </div>
+
+              {/* Right: Status Indicators */}
+              <div className="lg:col-span-8 grid grid-cols-2 lg:grid-cols-4 gap-3">
+                <div className="bg-surface-container/60 rounded-xl p-4 ghost-border text-center">
+                  <span className="text-[9px] text-muted uppercase tracking-widest block mb-1">Status</span>
+                  <span className={`text-xl font-black font-headline ${data.anomaly?.detected ? 'text-error' : 'text-secondary'}`}>
+                    {data.anomaly?.detected ? 'CRITICAL' : 'HEALTHY'}
+                  </span>
+                </div>
+                <div className="bg-surface-container/60 rounded-xl p-4 ghost-border text-center">
+                  <span className="text-[9px] text-muted uppercase tracking-widest block mb-1">AI Confidence</span>
+                  <span className={`text-xl font-black font-headline ${data.anomaly?.detected ? 'text-primary' : 'text-secondary'}`}>
+                    {data.anomaly?.detected ? '94%' : '99%'}
+                  </span>
+                </div>
+                <div className="bg-surface-container/60 rounded-xl p-4 ghost-border text-center">
+                  <span className="text-[9px] text-muted uppercase tracking-widest block mb-1">Affected Device</span>
+                  <span className="text-xl font-black font-headline text-on-surface">
+                    {data.anomaly?.device || '—'}
+                  </span>
+                </div>
+                <div className="bg-surface-container/60 rounded-xl p-4 ghost-border text-center">
+                  <span className="text-[9px] text-muted uppercase tracking-widest block mb-1">Impact</span>
+                  <span className={`text-xl font-black font-headline ${data.anomaly?.detected ? 'text-error' : 'text-secondary'}`}>
+                    {data.anomaly?.impact || 'NORMAL'}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Row 5: Weekly + Mix */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           <div className="lg:col-span-8 bg-surface-container-highest/60 rounded-2xl p-6 ghost-border flex flex-col">
             <div className="flex justify-between items-center mb-6">
