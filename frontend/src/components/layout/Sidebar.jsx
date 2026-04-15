@@ -19,8 +19,8 @@ export const Sidebar = () => {
           <div className="w-8 h-8 rounded-lg bg-primary/20 border border-primary/40 flex items-center justify-center text-primary shadow-[0_0_15px_rgba(63,255,139,0.3)]">
             <span className="material-symbols-outlined text-[18px]">electric_bolt</span>
           </div>
-          <h1 className="text-lg font-black font-headline tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#3fff8b] to-[#44a5ff] leading-none uppercase">
-            Kinetic<br/>Ether
+          <h1 className="text-[17px] font-black font-headline tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#3fff8b] to-[#44a5ff] leading-none uppercase whitespace-nowrap">
+            KINETIC ETHER
           </h1>
         </div>
       </div>
