@@ -1,18 +1,20 @@
 import React from 'react';
 import * as d3 from 'd3';
 
-export const D3EnergyMix = () => {
+export const D3EnergyMix = ({ data = [] }) => {
   const width = 144; // w-36 is 144px
   const height = 144; 
   
   const radius = Math.min(width, height) / 2;
   const innerRadius = radius * 0.80;
 
-  const data = [
-    { label: 'Solar', value: 75, color: '#ffa84f' },
-    { label: 'Battery', value: 17, color: '#3fff8b' },
-    { label: 'Grid', value: 8, color: '#44a5ff' }
-  ];
+  if (!data || data.length === 0) {
+     data = [
+      { label: 'Solar', value: 0, color: '#ffa84f' },
+      { label: 'Battery', value: 0, color: '#3fff8b' },
+      { label: 'Grid', value: 100, color: '#44a5ff' }
+    ];
+  }
 
   const pie = d3.pie()
     .value(d => d.value)

@@ -303,37 +303,50 @@ def chat():
     return jsonify({"reply": reply})
 
 
+import requests
+import time
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
 def start_firebase_sync():
-    """Listens to Firebase real-time and updates the generator state."""
-    if not generator.firebase_enabled:
-        print("[INFO] Skipping Firebase Sync: Admin SDK not initialized")
-        return
+    """Polls Firebase via REST API and updates the generator state."""
+    print("[OK] Starting REST Polling for Firebase...", flush=True)
+    
+    url = "https://energy-meter-5e417-default-rtdb.firebaseio.com/energy.json?auth=UM5WzGh6gdAYxCLC6zyurgK51cP8bt00etEbjy1u"
+    
+    while True:
+        try:
+            response = requests.get(url, timeout=5, verify=False)
+            if response.status_code == 200:
+                data = response.json()
+                if data:
+                    # Update generator with real hardware values
+                    generator.total_energy = data.get('power', 0)
+                    
+                    # Update history buffers for charts
+                    from datetime import datetime
+                    now_str = datetime.now().strftime('%H:%M:%S')
+                    
+                    generator.energy_history.append(round(generator.total_energy, 2))
+                    generator.timestamp_history.append(now_str)
+                    generator.predicted_history.append(round(generator.total_energy * 0.9, 2))
+                    generator.anomaly_history.append(False)
+                    
+                    # Sync environmental data
+                    if 'voltage' in data:
+                        generator.current_env['voltage'] = data['voltage']
+                    if 'frequency' in data:
+                        generator.current_env['frequency'] = data['frequency']
 
-    def listener(event):
-        if event.data:
-            data = event.data
-            # Update generator with real hardware values
-            generator.total_energy = data.get('power', 0)
-            
-            # Update history buffers for charts
-            generator.energy_history.append(round(generator.total_energy, 2))
-            
-            # Sync environmental data if available
-            if 'voltage' in data:
-                generator.current_env['voltage'] = data['voltage']
-            if 'frequency' in data:
-                generator.current_env['frequency'] = data['frequency']
-
-            # Record to SQLite for Analytics page
-            generator.write_to_db()
-            print(f"[OK] Synced Hardware Data: {generator.total_energy}W")
-
-    # Attach the listener to the 'energy' node
-    try:
-        firebase_db.reference('energy').listen(listener)
-        print("[OK] Firebase Real-time Sync Active")
-    except Exception as e:
-        print(f"[ERROR] Firebase Sync Error: {e}")
+                    # Record to SQLite
+                    generator.write_to_db()
+                    print(f"[OK] Polled Hardware Data: {generator.total_energy}W at {now_str}", flush=True)
+            else:
+                print(f"[WARN] Firebase Polling Error: HTTP {response.status_code}", flush=True)
+        except Exception as e:
+            print(f"[ERROR] Polling Loop Exception: {e}", flush=True)
+        
+        time.sleep(2) # Poll every 2 seconds
 
 if __name__ == "__main__":
     # Start Firebase sync in background

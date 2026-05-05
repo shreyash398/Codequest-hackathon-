@@ -1,23 +1,23 @@
 import React, { useState } from 'react';
 import * as d3 from 'd3';
 
-export const D3WeeklyPerformance = () => {
+export const D3WeeklyPerformance = ({ data = [] }) => {
   const width = 600;
   const height = 160;
   const margin = { top: 10, right: 10, bottom: 20, left: 30 };
   
-  const innerWidth = width - margin.left - margin.right;
-  const innerHeight = height - margin.top - margin.bottom;
-
-  const data = [
-    { day: 'Sat', solar: 42, grid: 48 },
-    { day: 'Sun', solar: 44, grid: 44 },
-    { day: 'Mon', solar: 38, grid: 49 },
-    { day: 'Tue', solar: 39, grid: 45 },
-    { day: 'Wed', solar: 44, grid: 45 },
-    { day: 'Thu', solar: 34, grid: 40 },
-    { day: 'Fri', solar: 46, grid: 50 },
-  ];
+  if (!data || data.length === 0) {
+    // Fallback dummy structure if no real data yet
+    data = [
+      { day: 'Mon', solar: 0, grid: 0 },
+      { day: 'Tue', solar: 0, grid: 0 },
+      { day: 'Wed', solar: 0, grid: 0 },
+      { day: 'Thu', solar: 0, grid: 0 },
+      { day: 'Fri', solar: 0, grid: 0 },
+      { day: 'Sat', solar: 0, grid: 0 },
+      { day: 'Sun', solar: 0, grid: 0 },
+    ];
+  }
 
   // Scales
   const x0 = d3.scaleBand()

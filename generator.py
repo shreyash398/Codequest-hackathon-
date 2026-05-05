@@ -378,17 +378,56 @@ class EnergyGenerator:
     # ------------------------------------------------------------------
     # Status payload (served to the frontend)
     # ------------------------------------------------------------------
+    def get_weekly_history(self):
+        """Retrieves last 7 days of consumption from SQLite."""
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                conn.row_factory = sqlite3.Row
+                cursor = conn.cursor()
+                # Aggregate by day for last 7 days
+                cursor.execute('''
+                    SELECT strftime('%w', timestamp) as day_idx, 
+                           AVG(total_energy) as avg_power
+                    FROM telemetry 
+                    GROUP BY day_idx
+                    ORDER BY day_idx ASC
+                ''')
+                rows = cursor.fetchall()
+                day_names = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+                weekly = []
+                for row in rows:
+                    idx = int(row['day_idx'])
+                    weekly.append({
+                        'day': day_names[idx],
+                        'solar': 0, # Placeholder until solar hardware added
+                        'grid': round(row['avg_power'], 1)
+                    })
+                return weekly
+        except:
+            return []
+
+    # ------------------------------------------------------------------
+    # Status payload (served to the frontend)
+    # ------------------------------------------------------------------
     def get_status(self):
+        total_kw = self.total_energy / 1000.0
         return {
             "total_energy": round(self.total_energy, 2),
             "money_lost": round(self.latest_analysis.get("total_money_lost", 0.0), 2),
-            "carbon_footprint": round(self.total_energy * self.co2_factor, 2),
+            "carbon_footprint": round(total_kw * self.co2_factor, 2),
             "appliances": self.appliances,
             "eco_mode": self.eco_mode,
             "anomaly": {
                 "detected": self.spike_active,
                 "device": self.anomaly_device,
                 "impact": "CRITICAL" if self.spike_active else "NORMAL",
+            },
+            # --- Real hardware stats ---
+            "stats": {
+                "daily_gen": 0.0,
+                "daily_cons": round(total_kw * 24, 1), # Simplified estimate
+                "savings": round(total_kw * 24 * self.unit_cost, 2),
+                "co2": round(total_kw * 24 * self.co2_factor, 1)
             },
             # --- Real dataset context ---
             "environment": self.current_env,
@@ -408,6 +447,8 @@ class EnergyGenerator:
                 "anomalies": list(self.anomaly_history),
                 "appliances": {name: list(vals) for name, vals in self.appliance_history.items()},
                 "environment": {k: list(v) for k, v in self.env_history.items()},
+                "weekly": self.get_weekly_history(),
+                "solar": [0] * len(self.energy_history)
             },
             "settings": self.settings,
         }

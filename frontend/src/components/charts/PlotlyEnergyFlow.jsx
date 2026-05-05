@@ -29,7 +29,7 @@ export const PlotlyEnergyFlow = ({ rawEnergy = [], solarGen = 0 }) => {
               opacity: 0.8
             },
             hoverinfo: 'y',
-            hovertemplate: 'Net: %{y:.2f} kW<extra></extra>'
+            hovertemplate: 'Net: %{y:.2f} W<extra></extra>'
           },
           {
             x: indices,
@@ -39,7 +39,7 @@ export const PlotlyEnergyFlow = ({ rawEnergy = [], solarGen = 0 }) => {
             name: 'Consumption',
             line: { shape: 'spline', color: '#44a5ff', width: 2.5 },
             marker: { color: '#44a5ff', size: 4 },
-            hovertemplate: 'Cons: %{y:.2f} kW<extra></extra>'
+            hovertemplate: 'Cons: %{y:.2f} W<extra></extra>'
           },
           {
             x: [0, Math.max(indices.length - 1, dataLen - 1)],
@@ -48,7 +48,7 @@ export const PlotlyEnergyFlow = ({ rawEnergy = [], solarGen = 0 }) => {
             mode: 'lines',
             name: 'Solar Gen',
             line: { color: '#ffa84f', width: 2, dash: 'dash' },
-            hovertemplate: 'Solar: %{y:.2f} kW<extra></extra>'
+            hovertemplate: 'Solar: %{y:.2f} W<extra></extra>'
           }
         ]}
         layout={{
@@ -72,7 +72,7 @@ export const PlotlyEnergyFlow = ({ rawEnergy = [], solarGen = 0 }) => {
             gridcolor: 'rgba(255,255,255,0.03)',
             gridwidth: 1,
             griddash: 'dot',
-            range: [-400, 600],
+            autorange: true,
             fixedrange: true,
           },
           hovermode: 'x unified',
