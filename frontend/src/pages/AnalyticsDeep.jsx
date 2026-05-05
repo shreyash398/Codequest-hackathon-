@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { getApiUrl } from '../apiConfig';
 import { motion } from 'framer-motion';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, ArcElement, Filler, Tooltip, Legend } from 'chart.js';
 import { Line, Doughnut } from 'react-chartjs-2';
@@ -8,7 +9,7 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, ArcEleme
 export const AnalyticsDeep = () => {
   const [data, setData] = useState(null);
   useEffect(() => {
-    const f = async () => { try { setData(await (await fetch('http://localhost:5000/api/status')).json()); } catch(e) {} };
+    const f = async () => { try { setData(await (await fetch(getApiUrl('/api/status'))).json()); } catch(e) {} };
     f(); const i = setInterval(f, 3000); return () => clearInterval(i);
   }, []);
   if (!data) return null;

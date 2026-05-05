@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getApiUrl } from '../apiConfig';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Tooltip } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
 
@@ -20,7 +21,7 @@ export const ControlCenter = () => {
   const handleRestart = async () => {
     try {
       showNotification('Restarting system...', 'warning');
-      const r = await fetch('http://localhost:5000/api/system/restart', { method: 'POST' });
+      const r = await fetch(getApiUrl('/api/system/restart'), { method: 'POST' });
       if (r.ok) {
         const result = await r.json();
         setData(result.status);
@@ -34,7 +35,7 @@ export const ControlCenter = () => {
   const handleExport = async (format) => {
     try {
       showNotification(`Exporting ${format.toUpperCase()}...`);
-      const response = await fetch(`http://localhost:5000/api/system/export?format=${format}`);
+      const response = await fetch(getApiUrl(`/api/system/export?format=${format}`));
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -55,20 +56,12 @@ export const ControlCenter = () => {
   };
 
   useEffect(() => {
-    const f = async () => { try { setData(await (await fetch('http://localhost:5000/api/status')).json()); } catch(e) {} };
+    const f = async () => { try { setData(await (await fetch(getApiUrl('/api/status'))).json()); } catch(e) {} };
     f(); const i = setInterval(f, 2000); return () => clearInterval(i);
   }, []);
 
   const toggleDevice = async (device, currentStatus) => {
-    try { await fetch('http://localhost:5000/api/control', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ device, status: currentStatus === 'ON' ? 'OFF' : 'ON' })}); } catch(e) {}
-  };
-
-  const triggerSpike = async () => {
-    try { await fetch('http://localhost:5000/api/trigger-spike', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ device: 'HVAC' })}); } catch(e) {}
-  };
-
-  const clearSpike = async () => {
-    try { await fetch('http://localhost:5000/api/clear-spike', { method: 'POST' }); } catch(e) {}
+    try { await fetch(getApiUrl('/api/control'), { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ device, status: currentStatus === 'ON' ? 'OFF' : 'ON' })}); } catch(e) {}
   };
 
   if (!data) return (
@@ -100,7 +93,7 @@ export const ControlCenter = () => {
 
         {/* Tab Content */}
         <AnimatePresence mode="wait">
-          {activeTab === 'Controls' && <ControlsTab key="controls" data={data} toggleDevice={toggleDevice} triggerSpike={triggerSpike} clearSpike={clearSpike} isAnomaly={isAnomaly} handleExport={handleExport} handleRestart={handleRestart} handleSaveConfig={handleSaveConfig} />}
+          {activeTab === 'Controls' && <ControlsTab key="controls" data={data} toggleDevice={toggleDevice} handleExport={handleExport} handleRestart={handleRestart} handleSaveConfig={handleSaveConfig} />}
           {activeTab === 'Settings' && <SettingsTab key="settings" data={data} showNotification={showNotification} />}
           {activeTab === 'Schedule' && <ScheduleTab key="schedule" data={data} />}
           {activeTab === 'Alerts' && <AlertsTab key="alerts" data={data} />}
@@ -128,10 +121,10 @@ export const ControlCenter = () => {
    ═══════════════════════════════════════════════════════════════ */
 const ControlsTab = ({ data, toggleDevice, triggerSpike, clearSpike, isAnomaly, handleExport, handleRestart, handleSaveConfig }) => {
   const devices = [
-    { name: 'HVAC', label: 'Solar Inverter', icon: 'wb_sunny', getDesc: (d) => `Active Generation: ${d?.current?.toFixed(1) || 0} kW` },
-    { name: 'Data Center', label: 'Battery System', icon: 'battery_charging_full', getDesc: (d) => `Charge Level: ${Math.round((d?.current || 0) / 1.2)}%` },
-    { name: 'Production Line', label: 'Grid Connection', icon: 'electrical_services', getDesc: (d) => `Net Metering: ${d?.status === 'ON' ? 'Exporting' : 'Standby'}` },
-    { name: 'Lighting', label: 'Smart Load Management', icon: 'tune', getDesc: (d) => `Optimizing ${Object.values(data.appliances).filter(a => a.status === 'ON').length * 3} appliances` },
+    { name: 'HVAC', label: 'Main Inverter', icon: 'wb_sunny', getDesc: (d) => `Phase A: Stable` },
+    { name: 'Data Center', label: 'Safety Relay', icon: 'shield', getDesc: (d) => `Auto-cutoff Enabled` },
+    { name: 'Production Line', label: 'Data Logger', icon: 'database', getDesc: (d) => `Syncing to Firebase` },
+    { name: 'Lighting', label: 'Network Bridge', icon: 'hub', getDesc: (d) => `Latency: 12ms` },
   ];
 
   const efficiencyRating = isAnomaly ? 78 : 92;
@@ -156,8 +149,8 @@ const ControlsTab = ({ data, toggleDevice, triggerSpike, clearSpike, isAnomaly, 
               <h3 className="text-lg font-bold font-headline">Device Controls</h3>
             </div>
             <span className="flex items-center gap-2 text-[10px] font-bold tracking-widest uppercase">
-              <span className={`w-2 h-2 rounded-full ${isAnomaly ? 'bg-error' : 'bg-secondary'} pulse-live`}></span>
-              <span className={isAnomaly ? 'text-error' : 'text-secondary'}>{isAnomaly ? 'ANOMALY' : 'SYSTEM LIVE'}</span>
+              <span className={`w-2 h-2 rounded-full bg-secondary pulse-live`}></span>
+              <span className="text-secondary">SYSTEM LIVE</span>
             </span>
           </div>
           <div className="space-y-3">
@@ -215,16 +208,11 @@ const ControlsTab = ({ data, toggleDevice, triggerSpike, clearSpike, isAnomaly, 
 
       {/* Real-time Kinetic Flow + Security */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <div className="lg:col-span-8 bg-surface-container-highest/60 rounded-2xl p-6 ghost-border">
-          <h3 className="text-lg font-bold font-headline mb-6">Real-time Kinetic Flow</h3>
-          <div className="flex items-end gap-8">
-            <div className="text-center">
-              <span className={`text-6xl font-black font-headline ${isAnomaly ? 'text-error' : 'text-secondary'}`}>{efficiencyRating}%</span>
-              <p className="text-[10px] text-muted uppercase tracking-widest mt-1">Efficiency Rating</p>
-            </div>
-            <div className="flex-1 h-32">
-              <Bar data={barData} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(0,0,0,0.9)', cornerRadius: 8 } }, scales: { x: { display: false }, y: { display: false } } }} />
-            </div>
+        <div className="lg:col-span-8 bg-surface-container-highest/60 rounded-2xl p-6 ghost-border flex flex-col items-center justify-center">
+          <div className="text-center">
+            <span className="material-symbols-outlined text-secondary text-5xl mb-2">check_circle</span>
+            <h3 className="text-xl font-bold font-headline mb-1">Hardware Synchronized</h3>
+            <p className="text-xs text-muted">Listening to Firebase Real-time Database for telemetry</p>
           </div>
         </div>
 
@@ -254,7 +242,7 @@ const SettingsTab = ({ data, showNotification }) => {
   
   const updateSetting = async (key, value) => {
     try {
-      const r = await fetch('http://localhost:5000/api/settings', {
+      const r = await fetch(getApiUrl('/api/settings'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ [key]: value })

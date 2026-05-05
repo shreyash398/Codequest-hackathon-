@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { getApiUrl } from '../apiConfig';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export const Alerts = () => {
@@ -6,7 +7,7 @@ export const Alerts = () => {
   const [alerts, setAlerts] = useState([]);
 
   useEffect(() => {
-    const f = async () => { try { setData(await (await fetch('http://localhost:5000/api/status')).json()); } catch(e) {} };
+    const f = async () => { try { setData(await (await fetch(getApiUrl('/api/status'))).json()); } catch(e) {} };
     f(); const i = setInterval(f, 3000); return () => clearInterval(i);
   }, []);
 

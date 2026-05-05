@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { getApiUrl } from '../apiConfig';
 import { motion } from 'framer-motion';
 
 export const Schedule = () => {
@@ -11,7 +12,7 @@ export const Schedule = () => {
   const [offPeakEnd, setOffPeakEnd] = useState('06:00');
 
   useEffect(() => {
-    const f = async () => { try { setData(await (await fetch('http://localhost:5000/api/status')).json()); } catch(e) {} };
+    const f = async () => { try { setData(await (await fetch(getApiUrl('/api/status'))).json()); } catch(e) {} };
     f(); const i = setInterval(f, 5000); return () => clearInterval(i);
   }, []);
 

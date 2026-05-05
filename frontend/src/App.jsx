@@ -6,12 +6,17 @@ import { Analytics } from './pages/Analytics';
 import { AnalyticsDeep } from './pages/AnalyticsDeep';
 import { ControlCenter } from './pages/ControlCenter';
 import { AIChatPanel } from './components/AIChatPanel';
+import LiveMeter from './components/LiveMeter';
 
 function App() {
   return (
     <div className="bg-background min-h-screen text-on-background selection:bg-primary/30 font-body">
       <Sidebar />
       
+      <div className="md:ml-64 px-6 pt-4">
+        <LiveMeter />
+      </div>
+
       <Routes>
         <Route path="/" element={<Dashboard />} />
         <Route path="/analytics" element={<Analytics />} />

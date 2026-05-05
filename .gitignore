@@ -22,3 +22,11 @@ Thumbs.db
 
 # Large Data
 india_monthly_full_release_long_format.csv
+
+# Credentials
+serviceAccountKey.json
+
+# Workspace Artifacts
+.jetro/
+.agents/
+.cursor/

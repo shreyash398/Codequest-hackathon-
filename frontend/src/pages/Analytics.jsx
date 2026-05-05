@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { getApiUrl } from '../apiConfig';
 import { motion } from 'framer-motion';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, ArcElement, Filler, Tooltip, Legend } from 'chart.js';
 import { Line, Doughnut } from 'react-chartjs-2';
@@ -20,7 +21,7 @@ export const Analytics = () => {
   const [isForecastLoading, setIsForecastLoading] = useState(false);
 
   useEffect(() => {
-    const f = async () => { try { setData(await (await fetch('http://localhost:5000/api/status')).json()); } catch(e) {} };
+    const f = async () => { try { setData(await (await fetch(getApiUrl('/api/status'))).json()); } catch(e) {} };
     f(); const i = setInterval(f, 3000); return () => clearInterval(i);
   }, []);
 
@@ -28,7 +29,7 @@ export const Analytics = () => {
     const fetchHistory = async () => {
       setIsHistoryLoading(true);
       try {
-        const r = await fetch(`http://localhost:5000/api/history?range=${historyRange}`);
+        const r = await fetch(getApiUrl(`/api/history?range=${historyRange}`));
         if (r.ok) {
           setHistoryData(await r.json());
         }
@@ -45,7 +46,7 @@ export const Analytics = () => {
     const fetchForecast = async () => {
       setIsForecastLoading(true);
       try {
-        const r = await fetch(`http://localhost:5000/api/forecast?horizon=${forecastHorizon}`);
+        const r = await fetch(getApiUrl(`/api/forecast?horizon=${forecastHorizon}`));
         if (r.ok) setForecastData(await r.json());
       } catch (e) {
         console.error("Failed to fetch forecast:", e);

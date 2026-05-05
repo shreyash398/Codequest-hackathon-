@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getApiUrl } from '../apiConfig';
 
 const SUGGESTIONS = [
   "What's my peak usage?",
@@ -32,7 +33,7 @@ export const AIChatPanel = () => {
     setIsLoading(true);
 
     try {
-      const r = await fetch('http://localhost:5000/chat', {
+      const r = await fetch(getApiUrl('/chat'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: userMsg })

@@ -3,6 +3,8 @@ import os
 import sqlite3
 from collections import deque
 from dotenv import load_dotenv
+import firebase_admin
+from firebase_admin import credentials, db as firebase_db
 from model import AnomalyDetector
 from data import DataProvider, ENERGY_BASE, ENERGY_RANGE, TEMP_MAX, HUMIDITY_MAX, WIND_MAX
 
@@ -71,6 +73,22 @@ class EnergyGenerator:
         self.timestamp_history = deque(maxlen=HISTORY_SIZE)
         self.predicted_history = deque(maxlen=HISTORY_SIZE)
         self.anomaly_history = deque(maxlen=HISTORY_SIZE)
+
+        # --- Firebase Integration ---
+        self.firebase_enabled = False
+        try:
+            cred_path = os.path.join(os.path.dirname(__file__), "serviceAccountKey.json")
+            if os.path.exists(cred_path):
+                cred = credentials.Certificate(cred_path)
+                firebase_admin.initialize_app(cred, {
+                    'databaseURL': 'https://energy-meter-5e417-default-rtdb.firebaseio.com'
+                })
+                self.firebase_enabled = True
+                print("[OK] Firebase Admin Initialized")
+            else:
+                print("[INFO] Firebase serviceAccountKey.json not found. Real-time push disabled.")
+        except Exception as e:
+            print(f"[ERROR] Firebase Initialization Error: {e}")
 
         # --- AI / ML anomaly detector ---
         self.detector = AnomalyDetector(
@@ -180,6 +198,17 @@ class EnergyGenerator:
 
         # 9. Sync to Database
         self.write_to_db()
+        
+        # 10. Push to Firebase
+        if self.firebase_enabled:
+            self.push_to_firebase()
+
+    def push_to_firebase(self):
+        try:
+            ref = firebase_db.reference('telemetry')
+            ref.set(self.get_status())
+        except Exception as e:
+            print(f"! Firebase Push Error: {e}")
 
     def write_to_db(self):
         try:

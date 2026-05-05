@@ -6,7 +6,10 @@ import os
 import sqlite3
 from dotenv import load_dotenv
 from flask_cors import CORS
-from generator import generator
+from generator import generator, HISTORY_SIZE
+import threading
+import firebase_admin
+from firebase_admin import db as firebase_db
 
 # Load environment
 load_dotenv()
@@ -24,7 +27,6 @@ def home():
 
 @app.route("/api/status")
 def get_status():
-    generator.update()
     return jsonify(generator.get_status())
 
 
@@ -301,5 +303,41 @@ def chat():
     return jsonify({"reply": reply})
 
 
+def start_firebase_sync():
+    """Listens to Firebase real-time and updates the generator state."""
+    if not generator.firebase_enabled:
+        print("[INFO] Skipping Firebase Sync: Admin SDK not initialized")
+        return
+
+    def listener(event):
+        if event.data:
+            data = event.data
+            # Update generator with real hardware values
+            generator.total_energy = data.get('power', 0)
+            
+            # Update history buffers for charts
+            generator.energy_history.append(round(generator.total_energy, 2))
+            
+            # Sync environmental data if available
+            if 'voltage' in data:
+                generator.current_env['voltage'] = data['voltage']
+            if 'frequency' in data:
+                generator.current_env['frequency'] = data['frequency']
+
+            # Record to SQLite for Analytics page
+            generator.write_to_db()
+            print(f"[OK] Synced Hardware Data: {generator.total_energy}W")
+
+    # Attach the listener to the 'energy' node
+    try:
+        firebase_db.reference('energy').listen(listener)
+        print("[OK] Firebase Real-time Sync Active")
+    except Exception as e:
+        print(f"[ERROR] Firebase Sync Error: {e}")
+
 if __name__ == "__main__":
-    app.run(port=5000, debug=True)
+    # Start Firebase sync in background
+    sync_thread = threading.Thread(target=start_firebase_sync, daemon=True)
+    sync_thread.start()
+    
+    app.run(host='0.0.0.0', port=5000, debug=True, use_reloader=False)
