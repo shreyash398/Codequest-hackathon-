@@ -11,7 +11,6 @@ Built for the **CodeQuest Hackathon**, Kinetic Ether combines real-time hardware
 ### 🔋 Real-Time Telemetry & Hardware Sync
 - **Live Monitoring**: Track Solar Generation, Grid Load, and Battery Storage with sub-second latency.
 - **Hardware Integration**: Synchronized with real smart-meter hardware via **Firebase Realtime Database**.
-- **Kaggle Simulation**: Augmented by the `ziya07/smart-meter-electricity-consumption-dataset` for realistic, large-scale data patterns.
 
 ### 🤖 AI Anomaly Detection & Forecasting
 - **Thermal Leakage Identification**: Intelligent detection of energy waste using sliding-window baseline models.
